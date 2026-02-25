@@ -57,7 +57,7 @@ const UNIT_ECONOMICS = {
   sellingPrice: 50000,
   printCost: 20000,
   shippingCost: 3000,
-  paymentFee: 1650,
+  paymentFee: 1500,
   packaging: 1000,
   gpuCost: 500,
   get variableCost() { return this.printCost + this.shippingCost + this.paymentFee + this.packaging + this.gpuCost; },
@@ -68,10 +68,10 @@ const UNIT_ECONOMICS = {
 const PHASES = {
   0: { label: 'Phase 0', desc: '1인 운영', fixedCost: 6500000, bep: 225 },
   1: { label: 'Phase 1', desc: '2인 운영', fixedCost: 14500000, bep: 503 },
-  2: { label: 'Phase 2', desc: '4~5인 운영', fixedCost: 43000000, bep: 1490 },
+  2: { label: 'Phase 2', desc: '5인 운영', fixedCost: 45000000, bep: 1800 },
 };
 
-const CURRENT_PHASE = 0;
+const CURRENT_PHASE = 2;
 
 const ORDER_STATUSES = [
   { key: 'order_placed', label: '주문접수', badge: 'badge-gray' },
@@ -102,59 +102,94 @@ const BGQA_CHECKS = [
 
 // ========== Mock Data ==========
 
+// 일평균 ~400건 (월 10,400건) 규모. 표시용 최근 샘플.
 const MOCK_ORDERS = [
-  { id: 'BK-20260226-001', buyer: '김서연', child: '서연', age: 4, theme: 'NAME', version: 'A', status: 'order_placed', createdAt: '2026-02-26 09:15', phone: '010-1234-5678' },
-  { id: 'BK-20260226-002', buyer: '이민준', child: '민준', age: 7, theme: 'NAME', version: 'B', status: 'order_placed', createdAt: '2026-02-26 09:42', phone: '010-2345-6789' },
-  { id: 'BK-20260226-003', buyer: '박하은', child: '하은', age: 3, theme: 'NAME', version: 'A', status: 'awaiting_photo', createdAt: '2026-02-26 08:30', phone: '010-3456-7890' },
-  { id: 'BK-20260226-004', buyer: '최도현', child: '도현', age: 5, theme: 'BDAY', version: 'A', status: 'awaiting_photo', createdAt: '2026-02-26 07:55', phone: '010-4567-8901' },
-  { id: 'BK-20260225-001', buyer: '정지우', child: '지우', age: 6, theme: 'NAME', version: 'B', status: 'ai_processing', createdAt: '2026-02-25 16:20', phone: '010-5678-9012' },
-  { id: 'BK-20260225-002', buyer: '강예린', child: '예린', age: 4, theme: 'NAME', version: 'A', status: 'ai_processing', createdAt: '2026-02-25 15:45', phone: '010-6789-0123' },
-  { id: 'BK-20260225-003', buyer: '윤시우', child: '시우', age: 8, theme: 'CAT', version: 'B', status: 'manual_review', createdAt: '2026-02-25 14:10', phone: '010-7890-1234' },
-  { id: 'BK-20260225-004', buyer: '조하윤', child: '하윤', age: 3, theme: 'NAME', version: 'A', status: 'preview_sent', createdAt: '2026-02-25 11:30', phone: '010-8901-2345' },
-  { id: 'BK-20260225-005', buyer: '한수아', child: '수아', age: 5, theme: 'NAME', version: 'A', status: 'preview_sent', createdAt: '2026-02-25 10:20', phone: '010-9012-3456' },
-  { id: 'BK-20260224-001', buyer: '오준서', child: '준서', age: 6, theme: 'ABC', version: 'B', status: 'user_approved', createdAt: '2026-02-24 17:00', phone: '010-0123-4567' },
-  { id: 'BK-20260224-002', buyer: '서유준', child: '유준', age: 4, theme: 'NAME', version: 'A', status: 'user_approved', createdAt: '2026-02-24 15:30', phone: '010-1111-2222' },
-  { id: 'BK-20260224-003', buyer: '임다은', child: '다은', age: 7, theme: 'RYAN', version: 'B', status: 'generating_print', createdAt: '2026-02-24 14:00', phone: '010-2222-3333' },
-  { id: 'BK-20260224-004', buyer: '송지호', child: '지호', age: 5, theme: 'NAME', version: 'A', status: 'print_requested', createdAt: '2026-02-24 10:00', phone: '010-3333-4444' },
-  { id: 'BK-20260223-001', buyer: '홍길동', child: '태양', age: 4, theme: 'NAME', version: 'A', status: 'print_requested', createdAt: '2026-02-23 16:00', phone: '010-4444-5555' },
-  { id: 'BK-20260223-002', buyer: '노지안', child: '지안', age: 3, theme: 'BDAY', version: 'A', status: 'printing', createdAt: '2026-02-23 09:30', phone: '010-5555-6666' },
-  { id: 'BK-20260222-001', buyer: '유서윤', child: '서윤', age: 5, theme: 'NAME', version: 'A', status: 'printing', createdAt: '2026-02-22 14:20', phone: '010-6666-7777' },
-  { id: 'BK-20260222-002', buyer: '배이준', child: '이준', age: 8, theme: 'NAME', version: 'B', status: 'shipped', createdAt: '2026-02-22 10:15', phone: '010-7777-8888', trackingNo: '6082012345678', carrier: 'CJ대한통운' },
-  { id: 'BK-20260221-001', buyer: '성하린', child: '하린', age: 4, theme: 'CAT', version: 'A', status: 'shipped', createdAt: '2026-02-21 16:30', phone: '010-8888-9999', trackingNo: '6082098765432', carrier: 'CJ대한통운' },
-  { id: 'BK-20260221-002', buyer: '장시온', child: '시온', age: 6, theme: 'NAME', version: 'B', status: 'shipped', createdAt: '2026-02-21 11:00', phone: '010-9999-0000', trackingNo: '4088812345678', carrier: '한진택배' },
-  { id: 'BK-20260220-001', buyer: '권예서', child: '예서', age: 5, theme: 'NAME', version: 'A', status: 'delivered', createdAt: '2026-02-20 09:00', phone: '010-1010-2020', trackingNo: '6082055555555', carrier: 'CJ대한통운' },
-  { id: 'BK-20260219-001', buyer: '문지민', child: '지민', age: 7, theme: 'ABC', version: 'B', status: 'delivered', createdAt: '2026-02-19 14:00', phone: '010-2020-3030', trackingNo: '6082066666666', carrier: 'CJ대한통운' },
-  { id: 'BK-20260218-001', buyer: '양수빈', child: '수빈', age: 4, theme: 'NAME', version: 'A', status: 'delivered', createdAt: '2026-02-18 11:30', phone: '010-3030-4040', trackingNo: '4088899999999', carrier: '한진택배' },
-  { id: 'BK-20260217-001', buyer: '황은우', child: '은우', age: 3, theme: 'BDAY', version: 'A', status: 'delivered', createdAt: '2026-02-17 10:00', phone: '010-4040-5050', trackingNo: '6082077777777', carrier: 'CJ대한통운' },
-  { id: 'BK-20260216-001', buyer: '안하준', child: '하준', age: 6, theme: 'NAME', version: 'B', status: 'delivered', createdAt: '2026-02-16 15:00', phone: '010-5050-6060', trackingNo: '6082088888888', carrier: 'CJ대한통운' },
+  // 오늘 (2/26) — 접수 중
+  { id: 'BK-20260226-387', buyer: '김서연', child: '서연', age: 4, theme: 'NAME', version: 'A', status: 'order_placed', createdAt: '2026-02-26 10:32', phone: '010-1234-5678' },
+  { id: 'BK-20260226-386', buyer: '이민준', child: '민준', age: 7, theme: 'NAME', version: 'B', status: 'order_placed', createdAt: '2026-02-26 10:15', phone: '010-2345-6789' },
+  { id: 'BK-20260226-385', buyer: '나윤서', child: '윤서', age: 5, theme: 'BDAY', version: 'A', status: 'order_placed', createdAt: '2026-02-26 09:58', phone: '010-1122-3344' },
+  { id: 'BK-20260226-384', buyer: '고은채', child: '은채', age: 3, theme: 'NAME', version: 'A', status: 'order_placed', createdAt: '2026-02-26 09:42', phone: '010-2233-4455' },
+  { id: 'BK-20260226-383', buyer: '박하은', child: '하은', age: 3, theme: 'NAME', version: 'A', status: 'awaiting_photo', createdAt: '2026-02-26 09:10', phone: '010-3456-7890' },
+  { id: 'BK-20260226-382', buyer: '최도현', child: '도현', age: 5, theme: 'CAT', version: 'A', status: 'awaiting_photo', createdAt: '2026-02-26 08:45', phone: '010-4567-8901' },
+  { id: 'BK-20260226-381', buyer: '장서아', child: '서아', age: 4, theme: 'NAME', version: 'A', status: 'awaiting_photo', createdAt: '2026-02-26 08:20', phone: '010-3344-5566' },
+  { id: 'BK-20260226-380', buyer: '신하율', child: '하율', age: 6, theme: 'ABC', version: 'B', status: 'ai_processing', createdAt: '2026-02-26 07:55', phone: '010-4455-6677' },
+  { id: 'BK-20260226-379', buyer: '류다인', child: '다인', age: 4, theme: 'NAME', version: 'A', status: 'ai_processing', createdAt: '2026-02-26 07:30', phone: '010-5566-7788' },
+  { id: 'BK-20260226-378', buyer: '백소율', child: '소율', age: 8, theme: 'RYAN', version: 'B', status: 'ai_processing', createdAt: '2026-02-26 07:12', phone: '010-6677-8899' },
+  // 어제 (2/25) — 처리 중
+  { id: 'BK-20260225-412', buyer: '정지우', child: '지우', age: 6, theme: 'NAME', version: 'B', status: 'manual_review', createdAt: '2026-02-25 18:20', phone: '010-5678-9012' },
+  { id: 'BK-20260225-411', buyer: '강예린', child: '예린', age: 4, theme: 'NAME', version: 'A', status: 'manual_review', createdAt: '2026-02-25 17:45', phone: '010-6789-0123' },
+  { id: 'BK-20260225-410', buyer: '윤시우', child: '시우', age: 8, theme: 'CAT', version: 'B', status: 'preview_sent', createdAt: '2026-02-25 16:10', phone: '010-7890-1234' },
+  { id: 'BK-20260225-409', buyer: '조하윤', child: '하윤', age: 3, theme: 'NAME', version: 'A', status: 'preview_sent', createdAt: '2026-02-25 15:30', phone: '010-8901-2345' },
+  { id: 'BK-20260225-408', buyer: '한수아', child: '수아', age: 5, theme: 'BDAY', version: 'A', status: 'preview_sent', createdAt: '2026-02-25 14:20', phone: '010-9012-3456' },
+  { id: 'BK-20260225-407', buyer: '문소이', child: '소이', age: 4, theme: 'NAME', version: 'A', status: 'preview_sent', createdAt: '2026-02-25 13:50', phone: '010-7788-9900' },
+  // 2/24 — 승인 & 인쇄
+  { id: 'BK-20260224-398', buyer: '오준서', child: '준서', age: 6, theme: 'ABC', version: 'B', status: 'user_approved', createdAt: '2026-02-24 17:00', phone: '010-0123-4567' },
+  { id: 'BK-20260224-397', buyer: '서유준', child: '유준', age: 4, theme: 'NAME', version: 'A', status: 'user_approved', createdAt: '2026-02-24 16:30', phone: '010-1111-2222' },
+  { id: 'BK-20260224-396', buyer: '임다은', child: '다은', age: 7, theme: 'RYAN', version: 'B', status: 'user_approved', createdAt: '2026-02-24 15:00', phone: '010-2222-3333' },
+  { id: 'BK-20260224-395', buyer: '송지호', child: '지호', age: 5, theme: 'NAME', version: 'A', status: 'generating_print', createdAt: '2026-02-24 14:00', phone: '010-3333-4444' },
+  { id: 'BK-20260224-394', buyer: '차예나', child: '예나', age: 3, theme: 'NAME', version: 'A', status: 'generating_print', createdAt: '2026-02-24 13:20', phone: '010-8899-0011' },
+  // 2/23 — 인쇄 진행
+  { id: 'BK-20260223-405', buyer: '홍길동', child: '태양', age: 4, theme: 'NAME', version: 'A', status: 'print_requested', createdAt: '2026-02-23 16:00', phone: '010-4444-5555' },
+  { id: 'BK-20260223-404', buyer: '노지안', child: '지안', age: 3, theme: 'BDAY', version: 'A', status: 'print_requested', createdAt: '2026-02-23 14:30', phone: '010-5555-6666' },
+  { id: 'BK-20260223-403', buyer: '탁민서', child: '민서', age: 5, theme: 'NAME', version: 'A', status: 'print_requested', createdAt: '2026-02-23 11:00', phone: '010-9900-1122' },
+  { id: 'BK-20260223-402', buyer: '유서윤', child: '서윤', age: 5, theme: 'CAT', version: 'A', status: 'printing', createdAt: '2026-02-23 09:30', phone: '010-6666-7777' },
+  { id: 'BK-20260223-401', buyer: '피수현', child: '수현', age: 7, theme: 'NAME', version: 'B', status: 'printing', createdAt: '2026-02-23 08:20', phone: '010-0011-2233' },
+  // 2/22 — 배송중
+  { id: 'BK-20260222-415', buyer: '배이준', child: '이준', age: 8, theme: 'NAME', version: 'B', status: 'shipped', createdAt: '2026-02-22 10:15', phone: '010-7777-8888', trackingNo: '6082012345678', carrier: 'CJ대한통운' },
+  { id: 'BK-20260222-414', buyer: '성하린', child: '하린', age: 4, theme: 'CAT', version: 'A', status: 'shipped', createdAt: '2026-02-22 09:30', phone: '010-8888-9999', trackingNo: '6082098765432', carrier: 'CJ대한통운' },
+  { id: 'BK-20260222-413', buyer: '장시온', child: '시온', age: 6, theme: 'NAME', version: 'B', status: 'shipped', createdAt: '2026-02-22 08:00', phone: '010-9999-0000', trackingNo: '4088812345678', carrier: '한진택배' },
+  { id: 'BK-20260221-420', buyer: '곽지율', child: '지율', age: 5, theme: 'NAME', version: 'A', status: 'shipped', createdAt: '2026-02-21 17:00', phone: '010-2233-4455', trackingNo: '6082011111111', carrier: 'CJ대한통운' },
+  { id: 'BK-20260221-419', buyer: '추연우', child: '연우', age: 3, theme: 'BDAY', version: 'A', status: 'shipped', createdAt: '2026-02-21 15:20', phone: '010-3344-5566', trackingNo: '4088822222222', carrier: '한진택배' },
+  // 배송 완료 (최근)
+  { id: 'BK-20260220-390', buyer: '권예서', child: '예서', age: 5, theme: 'NAME', version: 'A', status: 'delivered', createdAt: '2026-02-20 09:00', phone: '010-1010-2020', trackingNo: '6082055555555', carrier: 'CJ대한통운' },
+  { id: 'BK-20260219-385', buyer: '문지민', child: '지민', age: 7, theme: 'ABC', version: 'B', status: 'delivered', createdAt: '2026-02-19 14:00', phone: '010-2020-3030', trackingNo: '6082066666666', carrier: 'CJ대한통운' },
+  { id: 'BK-20260218-372', buyer: '양수빈', child: '수빈', age: 4, theme: 'NAME', version: 'A', status: 'delivered', createdAt: '2026-02-18 11:30', phone: '010-3030-4040', trackingNo: '4088899999999', carrier: '한진택배' },
+  { id: 'BK-20260217-368', buyer: '황은우', child: '은우', age: 3, theme: 'BDAY', version: 'A', status: 'delivered', createdAt: '2026-02-17 10:00', phone: '010-4040-5050', trackingNo: '6082077777777', carrier: 'CJ대한통운' },
+  { id: 'BK-20260216-355', buyer: '안하준', child: '하준', age: 6, theme: 'NAME', version: 'B', status: 'delivered', createdAt: '2026-02-16 15:00', phone: '010-5050-6060', trackingNo: '6082088888888', carrier: 'CJ대한통운' },
+  { id: 'BK-20260215-342', buyer: '진소윤', child: '소윤', age: 4, theme: 'RYAN', version: 'A', status: 'delivered', createdAt: '2026-02-15 13:00', phone: '010-6060-7070', trackingNo: '6082033333333', carrier: 'CJ대한통운' },
+  { id: 'BK-20260214-330', buyer: '봉도윤', child: '도윤', age: 5, theme: 'NAME', version: 'A', status: 'delivered', createdAt: '2026-02-14 09:30', phone: '010-7070-8080', trackingNo: '4088844444444', carrier: '한진택배' },
+  { id: 'BK-20260213-318', buyer: '엄시아', child: '시아', age: 3, theme: 'NAME', version: 'A', status: 'delivered', createdAt: '2026-02-13 11:00', phone: '010-8080-9090', trackingNo: '6082044444444', carrier: 'CJ대한통운' },
 ];
 
+// 일평균 ~400건 처리. 최근 로그 샘플.
 const MOCK_AI_LOG = [
-  { id: 'BK-20260225-001', child: '지우', model: 'BiRefNet-Portrait', time: 0.8, bgqaScore: 94, autoApproved: true, ts: '16:20' },
-  { id: 'BK-20260225-002', child: '예린', model: 'BiRefNet-HR-Matting', time: 1.4, bgqaScore: 91, autoApproved: true, ts: '15:46' },
-  { id: 'BK-20260225-003', child: '시우', model: 'BiRefNet-Portrait', time: 0.9, bgqaScore: 62, autoApproved: false, ts: '14:11' },
-  { id: 'BK-20260225-004', child: '하윤', model: 'BEN2', time: 1.8, bgqaScore: 97, autoApproved: true, ts: '11:31' },
-  { id: 'BK-20260225-005', child: '수아', model: 'BiRefNet-Portrait', time: 0.7, bgqaScore: 89, autoApproved: true, ts: '10:21' },
-  { id: 'BK-20260224-001', child: '준서', model: 'BiRefNet-HR', time: 1.1, bgqaScore: 93, autoApproved: true, ts: '17:01' },
-  { id: 'BK-20260224-002', child: '유준', model: 'BiRefNet-Portrait', time: 0.6, bgqaScore: 96, autoApproved: true, ts: '15:31' },
-  { id: 'BK-20260224-003', child: '다은', model: 'BiRefNet-Dynamic', time: 1.3, bgqaScore: 88, autoApproved: true, ts: '14:01' },
+  { id: 'BK-20260226-380', child: '하율', model: 'BiRefNet-Portrait', time: 0.7, bgqaScore: 95, autoApproved: true, ts: '07:56' },
+  { id: 'BK-20260226-379', child: '다인', model: 'BiRefNet-Portrait', time: 0.6, bgqaScore: 92, autoApproved: true, ts: '07:31' },
+  { id: 'BK-20260226-378', child: '소율', model: 'BiRefNet-HR-Matting', time: 1.3, bgqaScore: 88, autoApproved: true, ts: '07:13' },
+  { id: 'BK-20260225-412', child: '지우', model: 'BiRefNet-Portrait', time: 0.9, bgqaScore: 64, autoApproved: false, ts: '18:21' },
+  { id: 'BK-20260225-411', child: '예린', model: 'BEN2', time: 1.7, bgqaScore: 71, autoApproved: false, ts: '17:46' },
+  { id: 'BK-20260225-410', child: '시우', model: 'BiRefNet-Portrait', time: 0.8, bgqaScore: 93, autoApproved: true, ts: '16:11' },
+  { id: 'BK-20260225-409', child: '하윤', model: 'BiRefNet-Portrait', time: 0.6, bgqaScore: 97, autoApproved: true, ts: '15:31' },
+  { id: 'BK-20260225-408', child: '수아', model: 'BiRefNet-HR-Matting', time: 1.4, bgqaScore: 91, autoApproved: true, ts: '14:21' },
+  { id: 'BK-20260225-407', child: '소이', model: 'BiRefNet-Portrait', time: 0.7, bgqaScore: 94, autoApproved: true, ts: '13:51' },
+  { id: 'BK-20260224-398', child: '준서', model: 'BiRefNet-HR', time: 1.1, bgqaScore: 96, autoApproved: true, ts: '17:01' },
+  { id: 'BK-20260224-397', child: '유준', model: 'BiRefNet-Portrait', time: 0.5, bgqaScore: 98, autoApproved: true, ts: '16:31' },
+  { id: 'BK-20260224-396', child: '다은', model: 'BiRefNet-Dynamic', time: 1.2, bgqaScore: 89, autoApproved: true, ts: '15:01' },
+  { id: 'BK-20260224-395', child: '지호', model: 'BiRefNet-Portrait', time: 0.8, bgqaScore: 93, autoApproved: true, ts: '14:01' },
+  { id: 'BK-20260224-394', child: '예나', model: 'BiRefNet-Portrait', time: 0.6, bgqaScore: 90, autoApproved: true, ts: '13:21' },
+  { id: 'BK-20260224-393', child: '태양', model: 'BEN2', time: 1.9, bgqaScore: 85, autoApproved: true, ts: '12:40' },
 ];
 
 const MOCK_EXCEPTIONS = [
-  { id: 'BK-20260225-003', type: 'ai_quality', message: 'BGQA 점수 미달 (62점) — 얼굴 일부 가림, 수동 검수 필요', time: '14:11', severity: 'warning', resolved: false },
-  { id: 'BK-20260226-003', type: 'studio_inactive', message: '사진 미업로드 (주문 후 24시간 경과) — 알림톡 재발송 필요', time: '08:30', severity: 'info', resolved: false },
-  { id: 'BK-20260224-005', type: 'ai_failure', message: '배경 제거 실패 — GPU 메모리 부족 (VRAM 12GB 초과)', time: '어제 13:22', severity: 'error', resolved: true },
-  { id: 'BK-20260223-003', type: 'print_fail', message: '북토리 FTP 전송 실패 — 네트워크 타임아웃', time: '02-23 18:40', severity: 'error', resolved: true },
-  { id: 'BK-20260222-005', type: 'ai_quality', message: 'BGQA 홀 감지 — 배경 제거 후 몸통 영역 누락', time: '02-22 11:15', severity: 'warning', resolved: true },
-  { id: 'BK-20260221-004', type: 'delivery_delay', message: 'SLA 위반 (D+5) — CJ대한통운 지역 배송 지연', time: '02-21 09:00', severity: 'warning', resolved: true },
+  { id: 'BK-20260226-378', type: 'ai_quality', message: 'BGQA 점수 미달 (68점) — 복잡한 배경, 모발 경계 부정확', time: '07:13', severity: 'warning', resolved: false },
+  { id: 'BK-20260225-412', type: 'ai_quality', message: 'BGQA 점수 미달 (64점) — 얼굴 일부 가림, 수동 검수 필요', time: '어제 18:21', severity: 'warning', resolved: false },
+  { id: 'BK-20260225-411', type: 'ai_quality', message: 'BGQA 점수 미달 (71점) — 아이템(인형) 일부 잘림', time: '어제 17:46', severity: 'warning', resolved: false },
+  { id: 'BK-20260226-381', type: 'studio_inactive', message: '사진 미업로드 (주문 후 24시간 경과, 알림톡 1차 재발송 완료)', time: '08:20', severity: 'info', resolved: false },
+  { id: 'BK-20260225-350', type: 'studio_inactive', message: '사진 미업로드 (주문 후 48시간 경과, 알림톡 2차 재발송)', time: '어제 09:00', severity: 'info', resolved: false },
+  { id: 'BK-20260225-390', type: 'ai_failure', message: '배경 제거 실패 — GPU 메모리 부족 (동시 처리 과부하)', time: '어제 13:22', severity: 'error', resolved: true },
+  { id: 'BK-20260224-380', type: 'print_fail', message: '북토리 FTP 전송 실패 — 네트워크 타임아웃 (재시도 성공)', time: '02-24 18:40', severity: 'error', resolved: true },
+  { id: 'BK-20260223-350', type: 'ai_quality', message: 'BGQA 홀 감지 — 배경 제거 후 팔 영역 누락', time: '02-23 11:15', severity: 'warning', resolved: true },
+  { id: 'BK-20260222-320', type: 'delivery_delay', message: 'SLA 위반 (D+5) — CJ대한통운 제주 지역 배송 지연', time: '02-22 09:00', severity: 'warning', resolved: true },
+  { id: 'BK-20260221-290', type: 'print_fail', message: '인쇄 불량 — 표지 색상 편차 (재인쇄 요청 완료)', time: '02-21 15:30', severity: 'error', resolved: true },
 ];
 
+// MoM 성장률: 35% → 28% → 32% → 22% → 25% (평균 ~28%)
 const MOCK_MONTHLY_REVENUE = [
-  { month: '9월', units: 1200, revenue: 60000000 },
-  { month: '10월', units: 2400, revenue: 120000000 },
-  { month: '11월', units: 4000, revenue: 200000000 },
-  { month: '12월', units: 6200, revenue: 310000000 },
-  { month: '1월', units: 8000, revenue: 400000000 },
+  { month: '9월', units: 3200, revenue: 160000000 },
+  { month: '10월', units: 4320, revenue: 216000000 },
+  { month: '11월', units: 5530, revenue: 276500000 },
+  { month: '12월', units: 7300, revenue: 365000000 },
+  { month: '1월', units: 8900, revenue: 445000000 },
   { month: '2월', units: 10400, revenue: 520000000 },
 ];
 
@@ -811,7 +846,7 @@ function renderFinancePage() {
     </div>`;
 
   // Financial simulation
-  const simRows = [300, 500, 1000, 2000, 3000].map(units => {
+  const simRows = [3000, 5000, 10000, 15000, 20000].map(units => {
     const rev = units * UNIT_ECONOMICS.sellingPrice;
     const varCost = units * UNIT_ECONOMICS.variableCost;
     const gross = units * UNIT_ECONOMICS.profitPerUnit;
@@ -841,7 +876,7 @@ function renderFinancePage() {
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       ${card('Phase 로드맵', phaseInfo)}
-      ${card('손익 시뮬레이션 (Phase 0 기준)', `
+      ${card('손익 시뮬레이션 (Phase 2 기준)', `
         <div class="overflow-x-auto">
           <table class="w-full text-left">
             <thead><tr class="text-[10px] text-gray-400 uppercase tracking-wider">
@@ -855,7 +890,7 @@ function renderFinancePage() {
             <tbody>${simRows}</tbody>
           </table>
         </div>
-        <div class="text-xs text-gray-400 mt-3">고정비: ${fmtWon(phase.fixedCost)}원/월 (GPU 50만, 클라우드 30만, SaaS 20만, 마케팅 500만, 기타 50만)</div>
+        <div class="text-xs text-gray-400 mt-3">고정비: ${fmtWon(phase.fixedCost)}원/월 (인건비 2,500만, GPU 200만, 클라우드 100만, SaaS 50만, 마케팅 1,500만, 기타 150만)</div>
       `)}
     </div>`;
 }
@@ -957,14 +992,15 @@ function renderSettingsPage() {
           </div>
         </div>
       `)}
-      ${card('고정비 구조 (Phase 0)', `
+      ${card('고정비 구조 (Phase 2 · 5인)', `
         <div class="space-y-2">
           ${[
-            ['GPU 서버', '50만원'],
-            ['클라우드/인프라 (Firebase, Cloudflare)', '30만원'],
-            ['SaaS/도구 (Midjourney, AI 어시스턴트)', '20만원'],
-            ['마케팅', '500만원'],
-            ['기타 (세무, 통신)', '50만원'],
+            ['인건비 (4인 + 대표)', '2,500만원'],
+            ['GPU 서버 (멀티 GPU)', '200만원'],
+            ['클라우드/인프라 (Firebase, Cloudflare, CDN)', '100만원'],
+            ['SaaS/도구 (Midjourney, AI 어시스턴트)', '50만원'],
+            ['마케팅', '1,500만원'],
+            ['기타 (세무, 사무실, 통신)', '150만원'],
           ].map(([label, value]) => `
             <div class="flex items-center justify-between py-1">
               <span class="text-sm text-gray-600">${label}</span>
@@ -973,7 +1009,7 @@ function renderSettingsPage() {
           `).join('')}
           <div class="border-t border-gray-200 pt-2 mt-2 flex items-center justify-between">
             <span class="text-sm font-semibold text-gray-700">합계</span>
-            <span class="text-sm font-bold text-gray-800">650만원/월</span>
+            <span class="text-sm font-bold text-gray-800">4,500만원/월</span>
           </div>
         </div>
       `)}
