@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>몽비스토리 — 관리자 대시보드</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        primary: '#6c5ce7',
+        'primary-dark': '#5a4bd6',
+        'primary-light': '#a29bfe',
+      }
+    }
+  }
+}
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+  body { font-family: 'Inter', 'Apple SD Gothic Neo', sans-serif; }
+  .sidebar { transition: transform 0.3s ease; }
+  .nav-item.active { background: rgba(108,92,231,0.12); color: #6c5ce7; font-weight: 600; }
+  .stat-card { transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,0.08); }
+  .pipeline-step { transition: all 0.2s ease; }
+  .pipeline-step:hover { transform: scale(1.05); }
+  .table-row:hover { background: #f8f9fa; }
+  .bar-chart-bar { transition: height 0.5s ease; }
+  .badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 9999px; font-weight: 600; white-space: nowrap; }
+  .badge-gray { background: #f3f4f6; color: #6b7280; }
+  .badge-sky { background: #e0f2fe; color: #0369a1; }
+  .badge-indigo { background: #e0e7ff; color: #4338ca; }
+  .badge-violet { background: #ede9fe; color: #6d28d9; }
+  .badge-purple { background: #f3e8ff; color: #7c3aed; }
+  .badge-blue { background: #dbeafe; color: #1d4ed8; }
+  .badge-amber { background: #fef3c7; color: #92400e; }
+  .badge-orange { background: #ffedd5; color: #c2410c; }
+  .badge-teal { background: #ccfbf1; color: #0f766e; }
+  .badge-green { background: #dcfce7; color: #15803d; }
+  .badge-red { background: #fee2e2; color: #b91c1c; }
+  .badge-rose { background: #ffe4e6; color: #be123c; }
+  .progress-bar { height: 8px; border-radius: 9999px; background: #f3f4f6; overflow: hidden; }
+  .progress-fill { height: 100%; border-radius: 9999px; transition: width 0.8s ease; }
+  .donut { position: relative; width: 80px; height: 80px; }
+  .donut svg { transform: rotate(-90deg); }
+  .donut-label { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.875rem; }
+  .section-divider { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: #9ca3af; padding: 0.75rem 0.75rem 0.25rem; }
+  .filter-btn { transition: all 0.15s ease; }
+  .filter-btn.active { background: #6c5ce7; color: white; }
+</style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<!-- Login Screen -->
+<div id="login-screen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-50 to-gray-100" style="display:none;">
+  <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 w-full max-w-sm">
+    <div class="flex items-center justify-center gap-2 mb-6">
+      <div class="w-10 h-10 rounded-xl bg-primary flex items-center justify-center">
+        <span class="text-white font-bold text-lg">M</span>
+      </div>
+      <span class="font-bold text-gray-800 text-xl">몽비스토리</span>
+    </div>
+    <p class="text-sm text-gray-400 text-center mb-6">관리자 대시보드에 로그인하세요</p>
+    <form id="login-form">
+      <div class="mb-4">
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">아이디</label>
+        <input type="text" id="login-id" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition" placeholder="아이디 입력" autocomplete="username">
+      </div>
+      <div class="mb-5">
+        <label class="block text-xs font-medium text-gray-500 mb-1.5">비밀번호</label>
+        <input type="password" id="login-pw" class="w-full px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition" placeholder="비밀번호 입력" autocomplete="current-password">
+      </div>
+      <div id="login-error" class="text-xs text-red-500 mb-3 hidden">아이디 또는 비밀번호가 올바르지 않습니다.</div>
+      <button type="submit" class="w-full bg-primary text-white font-semibold py-2.5 rounded-lg hover:bg-primary-dark transition text-sm">로그인</button>
+    </form>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app-screen" class="flex min-h-screen" style="display:none;">
+
+  <!-- Sidebar -->
+  <aside class="sidebar w-60 bg-white border-r border-gray-200 flex-shrink-0 flex flex-col fixed inset-y-0 left-0 z-30">
+    <!-- Logo -->
+    <div class="px-5 py-5 border-b border-gray-100">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+          <span class="text-white font-bold text-sm">M</span>
+        </div>
+        <span class="font-bold text-gray-800 text-lg">몽비스토리</span>
+      </div>
+      <div class="text-xs text-gray-400 mt-1 ml-10">Admin Dashboard</div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="flex-1 py-3 px-3 overflow-y-auto">
+      <div class="section-divider">운영</div>
+      <a href="#" class="nav-item active flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm" data-page="dashboard">
+        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zm10 0a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+        대시보드
+      </a>
+      <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50" data-page="orders">
+        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+        주문 관리
+      </a>
+
+      <div class="section-divider mt-3">생산</div>
+      <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50" data-page="ai">
+        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        AI 모니터링
+      </a>
+      <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50" data-page="print">
+        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+        인쇄 관리
+      </a>
+      <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50" data-page="shipping">
+        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+        배송 현황
+      </a>
+      <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50" data-page="exceptions">
+        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+        예외 처리
+      </a>
+
+      <div class="section-divider mt-3">경영</div>
+      <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50" data-page="finance">
+        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        재무 현황
+      </a>
+      <a href="#" class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-gray-600 hover:bg-gray-50" data-page="settings">
+        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        설정
+      </a>
+    </nav>
+
+    <!-- Footer -->
+    <div class="px-5 py-4 border-t border-gray-100">
+      <div class="flex items-center gap-2 mb-2">
+        <span class="badge badge-violet">Phase 0</span>
+        <span class="text-xs text-gray-400">1인 운영</span>
+      </div>
+      <div class="text-xs text-gray-400">v0.2 &middot; Prototype</div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 ml-60">
+    <!-- Header -->
+    <header class="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
+      <div>
+        <h1 class="text-lg font-bold text-gray-800" id="page-title">대시보드</h1>
+        <p class="text-sm text-gray-400" id="header-date"></p>
+      </div>
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+          <span class="text-gray-500">AI 서버 정상</span>
+        </div>
+        <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center cursor-pointer" id="user-avatar" title="로그아웃">
+          <span class="text-white text-xs font-bold">TH</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="p-6" id="page-content">
+      <!-- Rendered by JS -->
+    </div>
+  </main>
+
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
