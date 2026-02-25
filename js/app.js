@@ -330,7 +330,10 @@ function renderDashboard() {
     const gh = Math.round((grossProfit / maxRev) * 100);
     return `
       <div class="flex flex-col items-center gap-1 flex-1">
-        <div class="text-[10px] text-gray-400 font-medium">${fmtWon(m.revenue)}</div>
+        <div class="flex gap-0.5 w-full">
+          <div class="flex-1 text-[9px] text-primary font-semibold text-center truncate">${fmtWon(m.revenue)}</div>
+          <div class="flex-1 text-[9px] text-emerald-600 font-semibold text-center truncate">${fmtWon(grossProfit)}</div>
+        </div>
         <div class="w-full relative flex gap-0.5" style="height:120px">
           <div class="flex-1 bg-gray-100 rounded-t relative">
             <div class="bar-chart-bar absolute bottom-0 w-full bg-primary rounded-t opacity-80" style="height:${h}%"></div>
@@ -814,7 +817,10 @@ function renderFinancePage() {
     const operatingProfit = grossProfit - phase.fixedCost;
     return `
       <div class="flex flex-col items-center gap-1 flex-1">
-        <div class="text-[10px] text-gray-400">${fmtWon(m.revenue)}</div>
+        <div class="flex gap-0.5 w-full">
+          <div class="flex-1 text-[9px] text-primary font-semibold text-center truncate">${fmtWon(m.revenue)}</div>
+          <div class="flex-1 text-[9px] text-emerald-600 font-semibold text-center truncate">${fmtWon(grossProfit)}</div>
+        </div>
         <div class="w-full relative flex gap-0.5" style="height:140px">
           <div class="flex-1 bg-gray-100 rounded-t relative">
             <div class="bar-chart-bar absolute bottom-0 w-full bg-primary rounded-t opacity-80" style="height:${h}%"></div>
