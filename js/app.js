@@ -155,7 +155,7 @@ const MOCK_MONTHLY_REVENUE = [
   { month: '11월', units: 138, revenue: 7590000 },
   { month: '12월', units: 210, revenue: 11550000 },
   { month: '1월', units: 275, revenue: 15125000 },
-  { month: '2월', units: 312, revenue: 17160000 },
+  { month: '2월', units: 945, revenue: 520000000 },
 ];
 
 // ========== Utility Functions ==========
@@ -291,17 +291,30 @@ function renderDashboard() {
   const maxRev = Math.max(...MOCK_MONTHLY_REVENUE.map(m => m.revenue));
   const barChart = MOCK_MONTHLY_REVENUE.map(m => {
     const h = Math.round((m.revenue / maxRev) * 100);
+    const grossProfit = m.units * UNIT_ECONOMICS.profitPerUnit;
+    const gh = Math.round((grossProfit / maxRev) * 100);
     return `
       <div class="flex flex-col items-center gap-1 flex-1">
         <div class="text-[10px] text-gray-400 font-medium">${fmtWon(m.revenue)}</div>
-        <div class="w-full bg-gray-100 rounded-t relative" style="height:120px">
-          <div class="bar-chart-bar absolute bottom-0 w-full bg-primary rounded-t opacity-80" style="height:${h}%"></div>
+        <div class="w-full relative flex gap-0.5" style="height:120px">
+          <div class="flex-1 bg-gray-100 rounded-t relative">
+            <div class="bar-chart-bar absolute bottom-0 w-full bg-primary rounded-t opacity-80" style="height:${h}%"></div>
+          </div>
+          <div class="flex-1 bg-gray-100 rounded-t relative">
+            <div class="bar-chart-bar absolute bottom-0 w-full bg-emerald-400 rounded-t opacity-80" style="height:${gh}%"></div>
+          </div>
         </div>
         <div class="text-[10px] text-gray-500 font-medium">${m.month}</div>
       </div>`;
   }).join('');
 
-  const revenueChart = card('월별 매출 추이', `<div class="flex items-end gap-2">${barChart}</div>`);
+  const chartLegend = `
+    <div class="flex items-center gap-4 mb-3">
+      <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm bg-primary opacity-80"></div><span class="text-[10px] text-gray-500">매출</span></div>
+      <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm bg-emerald-400 opacity-80"></div><span class="text-[10px] text-gray-500">매출총이익</span></div>
+    </div>`;
+
+  const revenueChart = card('월별 매출 추이', chartLegend + `<div class="flex items-end gap-2">${barChart}</div>`);
 
   const exceptionList = MOCK_EXCEPTIONS.filter(e => !e.resolved).map(e => {
     const sevBadge = e.severity === 'error' ? 'badge-red' : e.severity === 'warning' ? 'badge-amber' : 'badge-sky';
@@ -761,15 +774,22 @@ function renderFinancePage() {
   const maxRev = Math.max(...MOCK_MONTHLY_REVENUE.map(m => m.revenue));
   const bars = MOCK_MONTHLY_REVENUE.map(m => {
     const h = Math.round((m.revenue / maxRev) * 100);
-    const profit = (m.units * UNIT_ECONOMICS.profitPerUnit) - phase.fixedCost;
+    const grossProfit = m.units * UNIT_ECONOMICS.profitPerUnit;
+    const gh = Math.round((grossProfit / maxRev) * 100);
+    const operatingProfit = grossProfit - phase.fixedCost;
     return `
       <div class="flex flex-col items-center gap-1 flex-1">
         <div class="text-[10px] text-gray-400">${fmtWon(m.revenue)}</div>
-        <div class="w-full bg-gray-100 rounded-t relative" style="height:140px">
-          <div class="bar-chart-bar absolute bottom-0 w-full bg-primary rounded-t opacity-80" style="height:${h}%"></div>
+        <div class="w-full relative flex gap-0.5" style="height:140px">
+          <div class="flex-1 bg-gray-100 rounded-t relative">
+            <div class="bar-chart-bar absolute bottom-0 w-full bg-primary rounded-t opacity-80" style="height:${h}%"></div>
+          </div>
+          <div class="flex-1 bg-gray-100 rounded-t relative">
+            <div class="bar-chart-bar absolute bottom-0 w-full bg-emerald-400 rounded-t opacity-80" style="height:${gh}%"></div>
+          </div>
         </div>
         <div class="text-[10px] text-gray-500 font-medium">${m.month}</div>
-        <div class="text-[10px] ${profit >= 0 ? 'text-green-500' : 'text-red-400'}">${profit >= 0 ? '+' : ''}${fmtWon(profit)}</div>
+        <div class="text-[10px] ${operatingProfit >= 0 ? 'text-green-500' : 'text-red-400'}">${operatingProfit >= 0 ? '+' : ''}${fmtWon(operatingProfit)}</div>
       </div>`;
   }).join('');
 
@@ -811,7 +831,13 @@ function renderFinancePage() {
   return kpis + `
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       ${card('유닛 이코노믹스', costBreakdown)}
-      ${card('월별 매출/영업이익 추이', `<div class="flex items-end gap-2">${bars}</div>`)}
+      ${card('월별 매출/영업이익 추이', `
+        <div class="flex items-center gap-4 mb-3">
+          <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm bg-primary opacity-80"></div><span class="text-[10px] text-gray-500">매출</span></div>
+          <div class="flex items-center gap-1.5"><div class="w-3 h-3 rounded-sm bg-emerald-400 opacity-80"></div><span class="text-[10px] text-gray-500">매출총이익</span></div>
+        </div>
+        <div class="flex items-end gap-2">${bars}</div>
+      `)}
     </div>
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       ${card('Phase 로드맵', phaseInfo)}
