@@ -74,14 +74,11 @@ const PHASES = {
 const CURRENT_PHASE = 2;
 
 const ORDER_STATUSES = [
-  { key: 'order_placed', label: '주문접수', badge: 'badge-gray' },
-  { key: 'awaiting_photo', label: '사진대기', badge: 'badge-sky' },
-  { key: 'ai_processing', label: 'AI처리중', badge: 'badge-indigo' },
-  { key: 'manual_review', label: '수동검수', badge: 'badge-violet' },
-  { key: 'preview_sent', label: '미리보기', badge: 'badge-purple' },
-  { key: 'user_approved', label: '승인완료', badge: 'badge-blue' },
-  { key: 'generating_print', label: '인쇄파일생성', badge: 'badge-amber' },
-  { key: 'print_requested', label: '인쇄요청', badge: 'badge-orange' },
+  { key: 'making', label: '제작중', badge: 'badge-sky' },
+  { key: 'made', label: '제작완료', badge: 'badge-indigo' },
+  { key: 'paid', label: '결제완료', badge: 'badge-violet' },
+  { key: 'generating_print', label: '인쇄파일생성', badge: 'badge-purple' },
+  { key: 'print_requested', label: '인쇄요청', badge: 'badge-amber' },
   { key: 'printing', label: '인쇄중', badge: 'badge-orange' },
   { key: 'shipped', label: '배송중', badge: 'badge-teal' },
   { key: 'delivered', label: '배송완료', badge: 'badge-green' },
@@ -102,45 +99,44 @@ const BGQA_CHECKS = [
 
 // ========== Mock Data ==========
 
-// 일평균 ~400건 (월 10,400건) 규모. 표시용 최근 샘플.
+// 플로우: 제작중(무료) → 제작완료 → 결제완료 → 인쇄파일생성 → 인쇄요청 → 인쇄중 → 배송중 → 배송완료
+// 일평균 ~1,200명 제작 시도, ~400명 결제 (전환율 ~33%)
 const MOCK_ORDERS = [
-  // 오늘 (2/26) — 접수 중
-  { id: 'BK-20260226-387', buyer: '김서연', child: '서연', age: 4, theme: 'NAME', version: 'A', status: 'order_placed', createdAt: '2026-02-26 10:32', phone: '010-1234-5678' },
-  { id: 'BK-20260226-386', buyer: '이민준', child: '민준', age: 7, theme: 'NAME', version: 'B', status: 'order_placed', createdAt: '2026-02-26 10:15', phone: '010-2345-6789' },
-  { id: 'BK-20260226-385', buyer: '나윤서', child: '윤서', age: 5, theme: 'BDAY', version: 'A', status: 'order_placed', createdAt: '2026-02-26 09:58', phone: '010-1122-3344' },
-  { id: 'BK-20260226-384', buyer: '고은채', child: '은채', age: 3, theme: 'NAME', version: 'A', status: 'order_placed', createdAt: '2026-02-26 09:42', phone: '010-2233-4455' },
-  { id: 'BK-20260226-383', buyer: '박하은', child: '하은', age: 3, theme: 'NAME', version: 'A', status: 'awaiting_photo', createdAt: '2026-02-26 09:10', phone: '010-3456-7890' },
-  { id: 'BK-20260226-382', buyer: '최도현', child: '도현', age: 5, theme: 'CAT', version: 'A', status: 'awaiting_photo', createdAt: '2026-02-26 08:45', phone: '010-4567-8901' },
-  { id: 'BK-20260226-381', buyer: '장서아', child: '서아', age: 4, theme: 'NAME', version: 'A', status: 'awaiting_photo', createdAt: '2026-02-26 08:20', phone: '010-3344-5566' },
-  { id: 'BK-20260226-380', buyer: '신하율', child: '하율', age: 6, theme: 'ABC', version: 'B', status: 'ai_processing', createdAt: '2026-02-26 07:55', phone: '010-4455-6677' },
-  { id: 'BK-20260226-379', buyer: '류다인', child: '다인', age: 4, theme: 'NAME', version: 'A', status: 'ai_processing', createdAt: '2026-02-26 07:30', phone: '010-5566-7788' },
-  { id: 'BK-20260226-378', buyer: '백소율', child: '소율', age: 8, theme: 'RYAN', version: 'B', status: 'ai_processing', createdAt: '2026-02-26 07:12', phone: '010-6677-8899' },
-  // 어제 (2/25) — 처리 중
-  { id: 'BK-20260225-412', buyer: '정지우', child: '지우', age: 6, theme: 'NAME', version: 'B', status: 'manual_review', createdAt: '2026-02-25 18:20', phone: '010-5678-9012' },
-  { id: 'BK-20260225-411', buyer: '강예린', child: '예린', age: 4, theme: 'NAME', version: 'A', status: 'manual_review', createdAt: '2026-02-25 17:45', phone: '010-6789-0123' },
-  { id: 'BK-20260225-410', buyer: '윤시우', child: '시우', age: 8, theme: 'CAT', version: 'B', status: 'preview_sent', createdAt: '2026-02-25 16:10', phone: '010-7890-1234' },
-  { id: 'BK-20260225-409', buyer: '조하윤', child: '하윤', age: 3, theme: 'NAME', version: 'A', status: 'preview_sent', createdAt: '2026-02-25 15:30', phone: '010-8901-2345' },
-  { id: 'BK-20260225-408', buyer: '한수아', child: '수아', age: 5, theme: 'BDAY', version: 'A', status: 'preview_sent', createdAt: '2026-02-25 14:20', phone: '010-9012-3456' },
-  { id: 'BK-20260225-407', buyer: '문소이', child: '소이', age: 4, theme: 'NAME', version: 'A', status: 'preview_sent', createdAt: '2026-02-25 13:50', phone: '010-7788-9900' },
-  // 2/24 — 승인 & 인쇄
-  { id: 'BK-20260224-398', buyer: '오준서', child: '준서', age: 6, theme: 'ABC', version: 'B', status: 'user_approved', createdAt: '2026-02-24 17:00', phone: '010-0123-4567' },
-  { id: 'BK-20260224-397', buyer: '서유준', child: '유준', age: 4, theme: 'NAME', version: 'A', status: 'user_approved', createdAt: '2026-02-24 16:30', phone: '010-1111-2222' },
-  { id: 'BK-20260224-396', buyer: '임다은', child: '다은', age: 7, theme: 'RYAN', version: 'B', status: 'user_approved', createdAt: '2026-02-24 15:00', phone: '010-2222-3333' },
-  { id: 'BK-20260224-395', buyer: '송지호', child: '지호', age: 5, theme: 'NAME', version: 'A', status: 'generating_print', createdAt: '2026-02-24 14:00', phone: '010-3333-4444' },
-  { id: 'BK-20260224-394', buyer: '차예나', child: '예나', age: 3, theme: 'NAME', version: 'A', status: 'generating_print', createdAt: '2026-02-24 13:20', phone: '010-8899-0011' },
-  // 2/23 — 인쇄 진행
+  // 오늘 (2/26) — 제작 중 (무료 체험)
+  { id: 'BK-20260226-387', buyer: '김서연', child: '서연', age: 4, theme: 'NAME', version: 'A', status: 'making', createdAt: '2026-02-26 10:32', phone: '010-1234-5678' },
+  { id: 'BK-20260226-386', buyer: '이민준', child: '민준', age: 7, theme: 'NAME', version: 'B', status: 'making', createdAt: '2026-02-26 10:15', phone: '010-2345-6789' },
+  { id: 'BK-20260226-385', buyer: '나윤서', child: '윤서', age: 5, theme: 'BDAY', version: 'A', status: 'making', createdAt: '2026-02-26 09:58', phone: '010-1122-3344' },
+  { id: 'BK-20260226-384', buyer: '고은채', child: '은채', age: 3, theme: 'NAME', version: 'A', status: 'making', createdAt: '2026-02-26 09:42', phone: '010-2233-4455' },
+  { id: 'BK-20260226-383', buyer: '박하은', child: '하은', age: 3, theme: 'NAME', version: 'A', status: 'making', createdAt: '2026-02-26 09:10', phone: '010-3456-7890' },
+  { id: 'BK-20260226-382', buyer: '최도현', child: '도현', age: 5, theme: 'CAT', version: 'A', status: 'making', createdAt: '2026-02-26 08:45', phone: '010-4567-8901' },
+  { id: 'BK-20260226-381', buyer: '장서아', child: '서아', age: 4, theme: 'NAME', version: 'A', status: 'making', createdAt: '2026-02-26 08:20', phone: '010-3344-5566' },
+  // 제작 완료 (결제 대기)
+  { id: 'BK-20260226-380', buyer: '신하율', child: '하율', age: 6, theme: 'ABC', version: 'B', status: 'made', createdAt: '2026-02-26 07:55', phone: '010-4455-6677' },
+  { id: 'BK-20260226-379', buyer: '류다인', child: '다인', age: 4, theme: 'NAME', version: 'A', status: 'made', createdAt: '2026-02-26 07:30', phone: '010-5566-7788' },
+  { id: 'BK-20260225-412', buyer: '정지우', child: '지우', age: 6, theme: 'NAME', version: 'B', status: 'made', createdAt: '2026-02-25 18:20', phone: '010-5678-9012' },
+  { id: 'BK-20260225-411', buyer: '강예린', child: '예린', age: 4, theme: 'NAME', version: 'A', status: 'made', createdAt: '2026-02-25 17:45', phone: '010-6789-0123' },
+  { id: 'BK-20260225-410', buyer: '윤시우', child: '시우', age: 8, theme: 'CAT', version: 'B', status: 'made', createdAt: '2026-02-25 16:10', phone: '010-7890-1234' },
+  // 결제 완료
+  { id: 'BK-20260225-409', buyer: '조하윤', child: '하윤', age: 3, theme: 'NAME', version: 'A', status: 'paid', createdAt: '2026-02-25 15:30', phone: '010-8901-2345' },
+  { id: 'BK-20260225-408', buyer: '한수아', child: '수아', age: 5, theme: 'BDAY', version: 'A', status: 'paid', createdAt: '2026-02-25 14:20', phone: '010-9012-3456' },
+  { id: 'BK-20260225-407', buyer: '문소이', child: '소이', age: 4, theme: 'NAME', version: 'A', status: 'paid', createdAt: '2026-02-25 13:50', phone: '010-7788-9900' },
+  { id: 'BK-20260224-398', buyer: '오준서', child: '준서', age: 6, theme: 'ABC', version: 'B', status: 'paid', createdAt: '2026-02-24 17:00', phone: '010-0123-4567' },
+  // 인쇄 파일 생성 & 요청
+  { id: 'BK-20260224-397', buyer: '서유준', child: '유준', age: 4, theme: 'NAME', version: 'A', status: 'generating_print', createdAt: '2026-02-24 16:30', phone: '010-1111-2222' },
+  { id: 'BK-20260224-396', buyer: '임다은', child: '다은', age: 7, theme: 'RYAN', version: 'B', status: 'generating_print', createdAt: '2026-02-24 15:00', phone: '010-2222-3333' },
+  { id: 'BK-20260224-395', buyer: '송지호', child: '지호', age: 5, theme: 'NAME', version: 'A', status: 'print_requested', createdAt: '2026-02-24 14:00', phone: '010-3333-4444' },
   { id: 'BK-20260223-405', buyer: '홍길동', child: '태양', age: 4, theme: 'NAME', version: 'A', status: 'print_requested', createdAt: '2026-02-23 16:00', phone: '010-4444-5555' },
   { id: 'BK-20260223-404', buyer: '노지안', child: '지안', age: 3, theme: 'BDAY', version: 'A', status: 'print_requested', createdAt: '2026-02-23 14:30', phone: '010-5555-6666' },
-  { id: 'BK-20260223-403', buyer: '탁민서', child: '민서', age: 5, theme: 'NAME', version: 'A', status: 'print_requested', createdAt: '2026-02-23 11:00', phone: '010-9900-1122' },
+  // 인쇄중
   { id: 'BK-20260223-402', buyer: '유서윤', child: '서윤', age: 5, theme: 'CAT', version: 'A', status: 'printing', createdAt: '2026-02-23 09:30', phone: '010-6666-7777' },
   { id: 'BK-20260223-401', buyer: '피수현', child: '수현', age: 7, theme: 'NAME', version: 'B', status: 'printing', createdAt: '2026-02-23 08:20', phone: '010-0011-2233' },
-  // 2/22 — 배송중
+  // 배송중
   { id: 'BK-20260222-415', buyer: '배이준', child: '이준', age: 8, theme: 'NAME', version: 'B', status: 'shipped', createdAt: '2026-02-22 10:15', phone: '010-7777-8888', trackingNo: '6082012345678', carrier: 'CJ대한통운' },
   { id: 'BK-20260222-414', buyer: '성하린', child: '하린', age: 4, theme: 'CAT', version: 'A', status: 'shipped', createdAt: '2026-02-22 09:30', phone: '010-8888-9999', trackingNo: '6082098765432', carrier: 'CJ대한통운' },
   { id: 'BK-20260222-413', buyer: '장시온', child: '시온', age: 6, theme: 'NAME', version: 'B', status: 'shipped', createdAt: '2026-02-22 08:00', phone: '010-9999-0000', trackingNo: '4088812345678', carrier: '한진택배' },
   { id: 'BK-20260221-420', buyer: '곽지율', child: '지율', age: 5, theme: 'NAME', version: 'A', status: 'shipped', createdAt: '2026-02-21 17:00', phone: '010-2233-4455', trackingNo: '6082011111111', carrier: 'CJ대한통운' },
   { id: 'BK-20260221-419', buyer: '추연우', child: '연우', age: 3, theme: 'BDAY', version: 'A', status: 'shipped', createdAt: '2026-02-21 15:20', phone: '010-3344-5566', trackingNo: '4088822222222', carrier: '한진택배' },
-  // 배송 완료 (최근)
+  // 배송 완료
   { id: 'BK-20260220-390', buyer: '권예서', child: '예서', age: 5, theme: 'NAME', version: 'A', status: 'delivered', createdAt: '2026-02-20 09:00', phone: '010-1010-2020', trackingNo: '6082055555555', carrier: 'CJ대한통운' },
   { id: 'BK-20260219-385', buyer: '문지민', child: '지민', age: 7, theme: 'ABC', version: 'B', status: 'delivered', createdAt: '2026-02-19 14:00', phone: '010-2020-3030', trackingNo: '6082066666666', carrier: 'CJ대한통운' },
   { id: 'BK-20260218-372', buyer: '양수빈', child: '수빈', age: 4, theme: 'NAME', version: 'A', status: 'delivered', createdAt: '2026-02-18 11:30', phone: '010-3030-4040', trackingNo: '4088899999999', carrier: '한진택배' },
@@ -151,28 +147,33 @@ const MOCK_ORDERS = [
   { id: 'BK-20260213-318', buyer: '엄시아', child: '시아', age: 3, theme: 'NAME', version: 'A', status: 'delivered', createdAt: '2026-02-13 11:00', phone: '010-8080-9090', trackingNo: '6082044444444', carrier: 'CJ대한통운' },
 ];
 
-// 일평균 ~400건 처리. 최근 로그 샘플.
+// 5개 파이프라인 병렬 실행 → 사용자가 최종 선택
+// Pipeline 1: crop-ben2 (Crop + BEN2)
+// Pipeline 2: crop-removebg (Crop + remove.bg API)
+// Pipeline 3: sam2-birefnet (SAM2 + BiRefNet-HR matting)
+// Pipeline 4: sam2-vitmatte (SAM2 + ViTMatte)
+// Pipeline 5: crop-portrait (Crop + Portrait)
 const MOCK_AI_LOG = [
-  { id: 'BK-20260226-380', child: '하율', model: 'BiRefNet-Portrait', time: 0.7, bgqaScore: 95, autoApproved: true, ts: '07:56' },
-  { id: 'BK-20260226-379', child: '다인', model: 'BiRefNet-Portrait', time: 0.6, bgqaScore: 92, autoApproved: true, ts: '07:31' },
-  { id: 'BK-20260226-378', child: '소율', model: 'BiRefNet-HR-Matting', time: 1.3, bgqaScore: 88, autoApproved: true, ts: '07:13' },
-  { id: 'BK-20260225-412', child: '지우', model: 'BiRefNet-Portrait', time: 0.9, bgqaScore: 64, autoApproved: false, ts: '18:21' },
-  { id: 'BK-20260225-411', child: '예린', model: 'BEN2', time: 1.7, bgqaScore: 71, autoApproved: false, ts: '17:46' },
-  { id: 'BK-20260225-410', child: '시우', model: 'BiRefNet-Portrait', time: 0.8, bgqaScore: 93, autoApproved: true, ts: '16:11' },
-  { id: 'BK-20260225-409', child: '하윤', model: 'BiRefNet-Portrait', time: 0.6, bgqaScore: 97, autoApproved: true, ts: '15:31' },
-  { id: 'BK-20260225-408', child: '수아', model: 'BiRefNet-HR-Matting', time: 1.4, bgqaScore: 91, autoApproved: true, ts: '14:21' },
-  { id: 'BK-20260225-407', child: '소이', model: 'BiRefNet-Portrait', time: 0.7, bgqaScore: 94, autoApproved: true, ts: '13:51' },
-  { id: 'BK-20260224-398', child: '준서', model: 'BiRefNet-HR', time: 1.1, bgqaScore: 96, autoApproved: true, ts: '17:01' },
-  { id: 'BK-20260224-397', child: '유준', model: 'BiRefNet-Portrait', time: 0.5, bgqaScore: 98, autoApproved: true, ts: '16:31' },
-  { id: 'BK-20260224-396', child: '다은', model: 'BiRefNet-Dynamic', time: 1.2, bgqaScore: 89, autoApproved: true, ts: '15:01' },
-  { id: 'BK-20260224-395', child: '지호', model: 'BiRefNet-Portrait', time: 0.8, bgqaScore: 93, autoApproved: true, ts: '14:01' },
-  { id: 'BK-20260224-394', child: '예나', model: 'BiRefNet-Portrait', time: 0.6, bgqaScore: 90, autoApproved: true, ts: '13:21' },
-  { id: 'BK-20260224-393', child: '태양', model: 'BEN2', time: 1.9, bgqaScore: 85, autoApproved: true, ts: '12:40' },
+  { id: 'BK-20260226-380', child: '하율', pipeline: 'sam2-birefnet', time: 2.1, bgqaScore: 95, autoApproved: true, ts: '07:56' },
+  { id: 'BK-20260226-379', child: '다인', pipeline: 'crop-ben2', time: 1.4, bgqaScore: 92, autoApproved: true, ts: '07:31' },
+  { id: 'BK-20260226-378', child: '소율', pipeline: 'sam2-birefnet', time: 2.3, bgqaScore: 88, autoApproved: true, ts: '07:13' },
+  { id: 'BK-20260225-412', child: '지우', pipeline: 'sam2-vitmatte', time: 2.5, bgqaScore: 87, autoApproved: true, ts: '18:21' },
+  { id: 'BK-20260225-411', child: '예린', pipeline: 'crop-ben2', time: 1.3, bgqaScore: 84, autoApproved: true, ts: '17:46' },
+  { id: 'BK-20260225-410', child: '시우', pipeline: 'sam2-birefnet', time: 2.0, bgqaScore: 93, autoApproved: true, ts: '16:11' },
+  { id: 'BK-20260225-409', child: '하윤', pipeline: 'crop-ben2', time: 1.2, bgqaScore: 97, autoApproved: true, ts: '15:31' },
+  { id: 'BK-20260225-408', child: '수아', pipeline: 'sam2-birefnet', time: 2.2, bgqaScore: 91, autoApproved: true, ts: '14:21' },
+  { id: 'BK-20260225-407', child: '소이', pipeline: 'crop-portrait', time: 1.0, bgqaScore: 94, autoApproved: true, ts: '13:51' },
+  { id: 'BK-20260224-398', child: '준서', pipeline: 'sam2-birefnet', time: 2.4, bgqaScore: 96, autoApproved: true, ts: '17:01' },
+  { id: 'BK-20260224-397', child: '유준', pipeline: 'crop-ben2', time: 1.1, bgqaScore: 98, autoApproved: true, ts: '16:31' },
+  { id: 'BK-20260224-396', child: '다은', pipeline: 'sam2-vitmatte', time: 2.6, bgqaScore: 89, autoApproved: true, ts: '15:01' },
+  { id: 'BK-20260224-395', child: '지호', pipeline: 'crop-removebg', time: 0.8, bgqaScore: 93, autoApproved: true, ts: '14:01' },
+  { id: 'BK-20260224-394', child: '예나', pipeline: 'crop-portrait', time: 1.0, bgqaScore: 90, autoApproved: true, ts: '13:21' },
+  { id: 'BK-20260224-393', child: '태양', pipeline: 'sam2-birefnet', time: 2.1, bgqaScore: 85, autoApproved: true, ts: '12:40' },
 ];
 
 const MOCK_EXCEPTIONS = [
   { id: 'BK-20260226-378', type: 'ai_quality', message: 'BGQA 점수 미달 (68점) — 복잡한 배경, 모발 경계 부정확', time: '07:13', severity: 'warning', resolved: false },
-  { id: 'BK-20260225-412', type: 'ai_quality', message: 'BGQA 점수 미달 (64점) — 얼굴 일부 가림, 수동 검수 필요', time: '어제 18:21', severity: 'warning', resolved: false },
+  { id: 'BK-20260225-412', type: 'ai_quality', message: 'BGQA 점수 미달 (64점) — 얼굴 일부 가림, 사진 재업로드 요청', time: '어제 18:21', severity: 'warning', resolved: false },
   { id: 'BK-20260225-411', type: 'ai_quality', message: 'BGQA 점수 미달 (71점) — 아이템(인형) 일부 잘림', time: '어제 17:46', severity: 'warning', resolved: false },
   { id: 'BK-20260226-381', type: 'studio_inactive', message: '사진 미업로드 (주문 후 24시간 경과, 알림톡 1차 재발송 완료)', time: '08:20', severity: 'info', resolved: false },
   { id: 'BK-20260225-350', type: 'studio_inactive', message: '사진 미업로드 (주문 후 48시간 경과, 알림톡 2차 재발송)', time: '어제 09:00', severity: 'info', resolved: false },
@@ -185,13 +186,21 @@ const MOCK_EXCEPTIONS = [
 
 // MoM 성장률: 35% → 28% → 32% → 22% → 25% (평균 ~28%)
 const MOCK_MONTHLY_REVENUE = [
-  { month: '9월', units: 3200, revenue: 160000000 },
-  { month: '10월', units: 4320, revenue: 216000000 },
-  { month: '11월', units: 5530, revenue: 276500000 },
-  { month: '12월', units: 7300, revenue: 365000000 },
-  { month: '1월', units: 8900, revenue: 445000000 },
-  { month: '2월', units: 10400, revenue: 520000000 },
+  { month: '9월', units: 3200, revenue: 160000000, makers: 9600 },
+  { month: '10월', units: 4320, revenue: 216000000, makers: 13000 },
+  { month: '11월', units: 5530, revenue: 276500000, makers: 16900 },
+  { month: '12월', units: 7300, revenue: 365000000, makers: 21500 },
+  { month: '1월', units: 8900, revenue: 445000000, makers: 26700 },
+  { month: '2월', units: 10400, revenue: 520000000, makers: 31200 },
 ];
+
+// 제작→결제 전환 퍼널 (일 평균 기준)
+const MOCK_DAILY_FUNNEL = {
+  today: { started: 412, completed: 276, paid: 138 },
+  yesterday: { started: 1180, completed: 790, paid: 395 },
+  avg7d: { started: 1200, completed: 810, paid: 400 },
+  conversionRate: 33.3,
+};
 
 // ========== Utility Functions ==========
 
@@ -244,39 +253,93 @@ function card(title, content, className = '') {
   return `<div class="bg-white rounded-xl border border-gray-100 p-5 ${className}">${title ? `<h2 class="text-sm font-semibold text-gray-700 mb-4">${title}</h2>` : ''}${content}</div>`;
 }
 
+// ========== Real-time Simulation ==========
+
+// 이번 달 목표: 10,400권 판매, ~31,200명 제작 시도 (전환율 33.3%)
+// 일평균: ~400권 결제, ~1,200명 제작시도
+// 시간대별 가중치 (0시~23시) — 오전 10시~오후 10시 피크
+const HOURLY_WEIGHT = [0.5,0.3,0.2,0.1,0.1,0.2,0.5,1.5,3,5,6.5,7,7,6.5,6,6.5,7,7.5,7,6,5,4,2.5,1];
+const TOTAL_WEIGHT = HOURLY_WEIGHT.reduce((s,w) => s+w, 0);
+
+const SIM = {
+  dailyMakers: 1200,
+  dailyCompleted: 810,
+  dailyPaid: 400,
+  // 파이프라인 단계별 평균 체류 수 (동시 존재하는 건수)
+  avgInPipeline: {
+    making: 45,
+    made: 18,
+    paid: 12,
+    generating_print: 6,
+    print_requested: 8,
+    printing: 10,
+    shipped: 25,
+    delivered: 280,
+  },
+};
+
+function getSimulatedCounts() {
+  const now = new Date();
+  const hour = now.getHours();
+  const min = now.getMinutes();
+  const sec = now.getSeconds();
+
+  // 오늘 이 시간까지 누적된 가중치 비율
+  let cumWeight = 0;
+  for (let h = 0; h < hour; h++) cumWeight += HOURLY_WEIGHT[h];
+  cumWeight += HOURLY_WEIGHT[hour] * ((min * 60 + sec) / 3600);
+  const dayProgress = cumWeight / TOTAL_WEIGHT;
+
+  // 오늘 누적 수
+  const todayStarted = Math.round(SIM.dailyMakers * dayProgress);
+  const todayCompleted = Math.round(SIM.dailyCompleted * dayProgress);
+  const todayPaid = Math.round(SIM.dailyPaid * dayProgress);
+
+  // 파이프라인별 현재 건수 (기본값 + 약간의 랜덤 변동)
+  const pipeline = {};
+  for (const [key, avg] of Object.entries(SIM.avgInPipeline)) {
+    const jitter = Math.round((Math.random() - 0.5) * avg * 0.1);
+    pipeline[key] = Math.max(0, avg + jitter);
+  }
+
+  return { todayStarted, todayCompleted, todayPaid, pipeline, dayProgress };
+}
+
 // ========== State ==========
 
 let currentPage = 'dashboard';
 let orderFilter = 'all';
+let simInterval = null;
 
 // ========== Page Renderers ==========
 
 function renderDashboard() {
-  const todayOrders = MOCK_ORDERS.filter(o => o.createdAt.startsWith('2026-02-26')).length;
+  const sim = getSimulatedCounts();
   const thisMonthUnits = MOCK_MONTHLY_REVENUE[5].units;
   const thisMonthRevenue = MOCK_MONTHLY_REVENUE[5].revenue;
+  const thisMonthMakers = MOCK_MONTHLY_REVENUE[5].makers;
+  const convRate = MOCK_DAILY_FUNNEL.conversionRate;
   const phase = PHASES[CURRENT_PHASE];
   const bepPct = Math.round((thisMonthUnits / phase.bep) * 100);
   const activeExceptions = MOCK_EXCEPTIONS.filter(e => !e.resolved).length;
-  const aiAutoRate = ((MOCK_AI_LOG.filter(l => l.autoApproved).length / MOCK_AI_LOG.length) * 100).toFixed(1);
 
   // KPI Cards
   const kpis = `
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
       <div class="stat-card bg-white rounded-xl p-5 border border-gray-100">
-        <div class="text-xs text-gray-400 mb-1">오늘 주문</div>
-        <div class="text-2xl font-extrabold text-gray-800">${todayOrders}</div>
-        <div class="text-xs text-green-500 mt-1">BEP 일일 목표: ${Math.ceil(phase.bep / 30)}권</div>
+        <div class="text-xs text-gray-400 mb-1">오늘 제작 시도</div>
+        <div class="text-2xl font-extrabold text-gray-800" id="kpi-today-makers">${fmt(sim.todayStarted)}</div>
+        <div class="text-xs text-gray-400 mt-1">결제 <span id="kpi-today-paid">${fmt(sim.todayPaid)}</span>건 · 일평균 ${fmt(SIM.dailyMakers)}</div>
+      </div>
+      <div class="stat-card bg-white rounded-xl p-5 border border-gray-100">
+        <div class="text-xs text-gray-400 mb-1">제작→결제 전환율</div>
+        <div class="text-2xl font-extrabold text-primary">${convRate}%</div>
+        <div class="text-xs text-gray-400 mt-1">${fmt(thisMonthMakers)}명 제작 → ${fmt(thisMonthUnits)}명 결제</div>
       </div>
       <div class="stat-card bg-white rounded-xl p-5 border border-gray-100">
         <div class="text-xs text-gray-400 mb-1">이번 달 매출</div>
         <div class="text-2xl font-extrabold text-gray-800">${fmtWon(thisMonthRevenue)}원</div>
-        <div class="text-xs text-gray-400 mt-1">${thisMonthUnits}권 판매</div>
-      </div>
-      <div class="stat-card bg-white rounded-xl p-5 border border-gray-100">
-        <div class="text-xs text-gray-400 mb-1">AI 자동처리율</div>
-        <div class="text-2xl font-extrabold text-primary">${aiAutoRate}%</div>
-        <div class="text-xs ${parseFloat(aiAutoRate) >= 95 ? 'text-green-500' : 'text-orange-500'} mt-1">목표: 95%+</div>
+        <div class="text-xs text-gray-400 mt-1">${fmt(thisMonthUnits)}권 판매</div>
       </div>
       <div class="stat-card bg-white rounded-xl p-5 border border-gray-100">
         <div class="text-xs text-gray-400 mb-1">미처리 예외</div>
@@ -306,14 +369,62 @@ function renderDashboard() {
       <div class="text-xs text-gray-400 mt-2">단위 수익 ${fmt(UNIT_ECONOMICS.profitPerUnit)}원 (마진 ${UNIT_ECONOMICS.margin}%) · 손익분기 ${phase.bep}권/월</div>
     </div>`;
 
-  // Pipeline
-  const pipelineCounts = ORDER_STATUSES.map(s => ({ ...s, count: countByStatus(s.key) }));
+  // Conversion Funnel (오늘 실시간)
+  const completionRate = sim.todayStarted > 0 ? ((sim.todayCompleted / sim.todayStarted) * 100).toFixed(1) : '0.0';
+  const payRate = sim.todayCompleted > 0 ? ((sim.todayPaid / sim.todayCompleted) * 100).toFixed(1) : '0.0';
+  const overallRate = sim.todayStarted > 0 ? ((sim.todayPaid / sim.todayStarted) * 100).toFixed(1) : '0.0';
+  const funnelSection = `
+    <div class="bg-white rounded-xl border border-gray-100 p-5 mb-6">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-sm font-semibold text-gray-700">제작→결제 전환 퍼널</h2>
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></span>
+          <span class="text-xs text-gray-400">오늘 실시간</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <div class="flex-1 text-center">
+          <div class="bg-sky-50 rounded-lg py-4 px-3 border border-sky-100">
+            <div class="text-2xl font-extrabold text-sky-700" id="funnel-started">${fmt(sim.todayStarted)}</div>
+            <div class="text-xs text-sky-600 mt-1 font-medium">제작 시도</div>
+          </div>
+        </div>
+        <div class="flex flex-col items-center text-gray-400 flex-shrink-0">
+          <div class="text-xs font-semibold text-sky-500 mb-0.5" id="funnel-rate-1">${completionRate}%</div>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </div>
+        <div class="flex-1 text-center">
+          <div class="bg-indigo-50 rounded-lg py-4 px-3 border border-indigo-100">
+            <div class="text-2xl font-extrabold text-indigo-700" id="funnel-completed">${fmt(sim.todayCompleted)}</div>
+            <div class="text-xs text-indigo-600 mt-1 font-medium">제작 완료</div>
+          </div>
+        </div>
+        <div class="flex flex-col items-center text-gray-400 flex-shrink-0">
+          <div class="text-xs font-semibold text-indigo-500 mb-0.5" id="funnel-rate-2">${payRate}%</div>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
+        </div>
+        <div class="flex-1 text-center">
+          <div class="bg-primary/5 rounded-lg py-4 px-3 border border-primary/20">
+            <div class="text-2xl font-extrabold text-primary" id="funnel-paid">${fmt(sim.todayPaid)}</div>
+            <div class="text-xs text-primary mt-1 font-medium">결제 완료</div>
+          </div>
+        </div>
+      </div>
+      <div class="mt-3 text-center">
+        <span class="text-xs text-gray-400">전체 전환율</span>
+        <span class="text-sm font-bold text-primary ml-1" id="funnel-overall">${overallRate}%</span>
+        <span class="text-xs text-gray-400 ml-3">일평균: ${fmt(SIM.dailyMakers)}명 → ${fmt(SIM.dailyPaid)}명 (${MOCK_DAILY_FUNNEL.conversionRate}%)</span>
+      </div>
+    </div>`;
+
+  // Pipeline (실시간 시뮬레이션)
+  const pipelineCounts = ORDER_STATUSES.map(s => ({ ...s, count: sim.pipeline[s.key] || 0 }));
   const pipelineHtml = pipelineCounts.map((s, i) => {
     const arrow = i < pipelineCounts.length - 1
       ? '<div class="text-gray-300 flex-shrink-0 text-xs">&rarr;</div>' : '';
     return `
       <div class="pipeline-step ${s.badge.replace('badge-', 'bg-').replace('bg-bg-', 'bg-')} bg-opacity-30 rounded-lg px-2.5 py-2 text-center min-w-[72px] flex-shrink-0 cursor-default border border-transparent hover:border-gray-200">
-        <div class="text-lg font-bold">${s.count}</div>
+        <div class="text-lg font-bold" id="pipe-${s.key}">${s.count}</div>
         <div class="text-[10px] whitespace-nowrap">${s.label}</div>
       </div>${arrow}`;
   }).join('');
@@ -387,7 +498,7 @@ function renderDashboard() {
 
   const themeCard = card('테마별 주문', themeRows);
 
-  return kpis + bepSection + pipeline + `
+  return kpis + bepSection + funnelSection + pipeline + `
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
       ${revenueChart}
       ${exceptionsCard}
@@ -459,11 +570,9 @@ function renderOrdersPage() {
 
 function renderAIPage() {
   const total = MOCK_AI_LOG.length;
-  const autoApproved = MOCK_AI_LOG.filter(l => l.autoApproved).length;
-  const autoRate = ((autoApproved / total) * 100).toFixed(1);
   const avgTime = (MOCK_AI_LOG.reduce((s, l) => s + l.time, 0) / total).toFixed(1);
   const avgScore = Math.round(MOCK_AI_LOG.reduce((s, l) => s + l.bgqaScore, 0) / total);
-  const manualQueue = MOCK_AI_LOG.filter(l => !l.autoApproved);
+  const successRate = 100; // 완전 자동화
 
   // Stats
   const stats = `
@@ -471,17 +580,17 @@ function renderAIPage() {
       <div class="stat-card bg-white rounded-xl p-5 border border-gray-100">
         <div class="text-xs text-gray-400 mb-1">처리 건수</div>
         <div class="text-2xl font-extrabold text-gray-800">${total}</div>
-        <div class="text-xs text-gray-400 mt-1">최근 2일</div>
+        <div class="text-xs text-gray-400 mt-1">최근 2일 샘플</div>
       </div>
       <div class="stat-card bg-white rounded-xl p-5 border border-gray-100">
-        <div class="text-xs text-gray-400 mb-1">자동 승인율</div>
-        <div class="text-2xl font-extrabold ${parseFloat(autoRate) >= 95 ? 'text-green-600' : 'text-orange-500'}">${autoRate}%</div>
-        <div class="text-xs ${parseFloat(autoRate) >= 95 ? 'text-green-500' : 'text-orange-500'} mt-1">목표: 95%+</div>
+        <div class="text-xs text-gray-400 mb-1">자동화율</div>
+        <div class="text-2xl font-extrabold text-green-600">${successRate}%</div>
+        <div class="text-xs text-green-500 mt-1">완전 자동화</div>
       </div>
       <div class="stat-card bg-white rounded-xl p-5 border border-gray-100">
         <div class="text-xs text-gray-400 mb-1">평균 처리시간</div>
         <div class="text-2xl font-extrabold text-gray-800">${avgTime}초</div>
-        <div class="text-xs text-gray-400 mt-1">0.5~2초 범위</div>
+        <div class="text-xs text-gray-400 mt-1">5개 파이프라인 병렬</div>
       </div>
       <div class="stat-card bg-white rounded-xl p-5 border border-gray-100">
         <div class="text-xs text-gray-400 mb-1">평균 BGQA 점수</div>
@@ -490,18 +599,26 @@ function renderAIPage() {
       </div>
     </div>`;
 
-  // Model distribution
-  const modelCounts = {};
-  MOCK_AI_LOG.forEach(l => { modelCounts[l.model] = (modelCounts[l.model] || 0) + 1; });
-  const modelBars = Object.entries(modelCounts).sort((a, b) => b[1] - a[1]).map(([model, count]) => {
+  // Pipeline distribution (사용자가 최종 선택한 파이프라인)
+  const PIPELINE_LABELS = {
+    'crop-ben2': '1. Crop + BEN2',
+    'crop-removebg': '2. Crop + remove.bg',
+    'sam2-birefnet': '3. SAM2 + BiRefNet',
+    'sam2-vitmatte': '4. SAM2 + ViTMatte',
+    'crop-portrait': '5. Crop + Portrait',
+  };
+  const pipelineCounts = {};
+  MOCK_AI_LOG.forEach(l => { pipelineCounts[l.pipeline] = (pipelineCounts[l.pipeline] || 0) + 1; });
+  const pipelineBars = Object.entries(pipelineCounts).sort((a, b) => b[1] - a[1]).map(([key, count]) => {
     const pct = Math.round((count / total) * 100);
     return `
       <div class="flex items-center gap-3 py-1.5">
-        <span class="text-xs w-36 text-gray-600 font-mono">${model}</span>
+        <span class="text-xs w-40 text-gray-600 font-mono">${PIPELINE_LABELS[key] || key}</span>
         <div class="flex-1">${progressBar(pct, 'bg-indigo-500')}</div>
         <span class="text-xs text-gray-500 w-16 text-right">${count}건 (${pct}%)</span>
       </div>`;
   }).join('');
+  const pipelineNote = `<div class="text-[10px] text-gray-400 mt-3">5개 파이프라인 병렬 실행 후 사용자가 최종 결과 선택</div>`;
 
   // BGQA checks overview
   const bgqaOverview = BGQA_CHECKS.map(check => `
@@ -511,66 +628,32 @@ function renderAIPage() {
     </div>
   `).join('');
 
-  // Manual review queue
-  const manualRows = manualQueue.map(l => `
-    <tr class="table-row border-t border-gray-50">
-      <td class="py-3 px-4 text-xs font-mono text-gray-500">${l.id}</td>
-      <td class="py-3 px-4 text-sm">${l.child}</td>
-      <td class="py-3 px-4 text-xs font-mono">${l.model}</td>
-      <td class="py-3 px-4"><span class="badge badge-amber">${l.bgqaScore}점</span></td>
-      <td class="py-3 px-4 text-xs text-gray-400">${l.ts}</td>
-      <td class="py-3 px-4">
-        <div class="flex gap-2">
-          <button class="text-xs text-green-600 font-semibold hover:underline">승인</button>
-          <button class="text-xs text-orange-600 font-semibold hover:underline">재촬영 요청</button>
-        </div>
-      </td>
-    </tr>
-  `).join('');
-
   // Processing log
   const logRows = MOCK_AI_LOG.map(l => `
     <tr class="table-row border-t border-gray-50">
       <td class="py-2.5 px-4 text-xs font-mono text-gray-500">${l.id}</td>
       <td class="py-2.5 px-4 text-sm">${l.child}</td>
-      <td class="py-2.5 px-4 text-xs font-mono text-gray-500">${l.model}</td>
+      <td class="py-2.5 px-4 text-xs font-mono text-gray-500">${PIPELINE_LABELS[l.pipeline] || l.pipeline}</td>
       <td class="py-2.5 px-4 text-xs">${l.time}초</td>
       <td class="py-2.5 px-4"><span class="badge ${l.bgqaScore >= 80 ? 'badge-green' : 'badge-amber'}">${l.bgqaScore}점</span></td>
-      <td class="py-2.5 px-4"><span class="badge ${l.autoApproved ? 'badge-green' : 'badge-amber'}">${l.autoApproved ? '자동승인' : '수동검수'}</span></td>
       <td class="py-2.5 px-4 text-xs text-gray-400">${l.ts}</td>
     </tr>
   `).join('');
 
   return stats + `
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-      ${card('모델 사용 분포', modelBars)}
+      ${card('파이프라인 선택 분포', pipelineBars + pipelineNote)}
       ${card('BGQA 8항목 체크리스트', bgqaOverview)}
     </div>
-    ${manualQueue.length > 0 ? card('수동 검수 큐 (' + manualQueue.length + '건)', `
-      <div class="overflow-x-auto">
-        <table class="w-full text-left">
-          <thead><tr class="text-[10px] text-gray-400 uppercase tracking-wider">
-            <th class="py-2 px-4">주문번호</th>
-            <th class="py-2 px-4">아이</th>
-            <th class="py-2 px-4">모델</th>
-            <th class="py-2 px-4">BGQA</th>
-            <th class="py-2 px-4">시간</th>
-            <th class="py-2 px-4">액션</th>
-          </tr></thead>
-          <tbody>${manualRows}</tbody>
-        </table>
-      </div>
-    `, 'mb-6') : ''}
     ${card('처리 로그', `
       <div class="overflow-x-auto">
         <table class="w-full text-left">
           <thead><tr class="text-[10px] text-gray-400 uppercase tracking-wider">
             <th class="py-2 px-4">주문번호</th>
             <th class="py-2 px-4">아이</th>
-            <th class="py-2 px-4">모델</th>
-            <th class="py-2 px-4">시간</th>
+            <th class="py-2 px-4">선택 파이프라인</th>
+            <th class="py-2 px-4">처리시간</th>
             <th class="py-2 px-4">BGQA</th>
-            <th class="py-2 px-4">결과</th>
             <th class="py-2 px-4">처리시각</th>
           </tr></thead>
           <tbody>${logRows}</tbody>
@@ -1037,6 +1120,38 @@ const PAGE_TITLES = {
 
 // ========== Navigation ==========
 
+// 실시간 숫자 업데이트 (DOM 직접 조작 — 전체 리렌더 없이)
+function tickDashboard() {
+  if (currentPage !== 'dashboard') return;
+  const sim = getSimulatedCounts();
+
+  const el = (id) => document.getElementById(id);
+  if (el('kpi-today-makers')) el('kpi-today-makers').textContent = fmt(sim.todayStarted);
+  if (el('kpi-today-paid')) el('kpi-today-paid').textContent = fmt(sim.todayPaid);
+
+  // 퍼널
+  if (el('funnel-started')) el('funnel-started').textContent = fmt(sim.todayStarted);
+  if (el('funnel-completed')) el('funnel-completed').textContent = fmt(sim.todayCompleted);
+  if (el('funnel-paid')) el('funnel-paid').textContent = fmt(sim.todayPaid);
+  if (el('funnel-rate-1') && sim.todayStarted > 0) el('funnel-rate-1').textContent = ((sim.todayCompleted / sim.todayStarted) * 100).toFixed(1) + '%';
+  if (el('funnel-rate-2') && sim.todayCompleted > 0) el('funnel-rate-2').textContent = ((sim.todayPaid / sim.todayCompleted) * 100).toFixed(1) + '%';
+  if (el('funnel-overall') && sim.todayStarted > 0) el('funnel-overall').textContent = ((sim.todayPaid / sim.todayStarted) * 100).toFixed(1) + '%';
+
+  // 파이프라인
+  for (const [key, count] of Object.entries(sim.pipeline)) {
+    if (el('pipe-' + key)) el('pipe-' + key).textContent = count;
+  }
+}
+
+function startSimulation() {
+  if (simInterval) clearInterval(simInterval);
+  simInterval = setInterval(tickDashboard, 3000); // 3초마다 업데이트
+}
+
+function stopSimulation() {
+  if (simInterval) { clearInterval(simInterval); simInterval = null; }
+}
+
 function navigate(page) {
   currentPage = page;
   orderFilter = 'all';
@@ -1052,9 +1167,10 @@ function navigate(page) {
 
   document.getElementById('page-title').textContent = PAGE_TITLES[page] || page;
 
+  stopSimulation();
   const content = document.getElementById('page-content');
   switch (page) {
-    case 'dashboard': content.innerHTML = renderDashboard(); break;
+    case 'dashboard': content.innerHTML = renderDashboard(); startSimulation(); break;
     case 'orders': content.innerHTML = renderOrdersPage(); break;
     case 'ai': content.innerHTML = renderAIPage(); break;
     case 'print': content.innerHTML = renderPrintPage(); break;
