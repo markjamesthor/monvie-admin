@@ -54,7 +54,7 @@ function showApp() {
 // ========== Constants (사업계획서 기반) ==========
 
 const UNIT_ECONOMICS = {
-  sellingPrice: 55000,
+  sellingPrice: 50000,
   printCost: 20000,
   shippingCost: 3000,
   paymentFee: 1650,
@@ -150,12 +150,12 @@ const MOCK_EXCEPTIONS = [
 ];
 
 const MOCK_MONTHLY_REVENUE = [
-  { month: '9월', units: 45, revenue: 2475000 },
-  { month: '10월', units: 82, revenue: 4510000 },
-  { month: '11월', units: 138, revenue: 7590000 },
-  { month: '12월', units: 210, revenue: 11550000 },
-  { month: '1월', units: 275, revenue: 15125000 },
-  { month: '2월', units: 945, revenue: 520000000 },
+  { month: '9월', units: 1200, revenue: 60000000 },
+  { month: '10월', units: 2400, revenue: 120000000 },
+  { month: '11월', units: 4000, revenue: 200000000 },
+  { month: '12월', units: 6200, revenue: 310000000 },
+  { month: '1월', units: 8000, revenue: 400000000 },
+  { month: '2월', units: 10400, revenue: 520000000 },
 ];
 
 // ========== Utility Functions ==========
